@@ -1,7 +1,5 @@
 # SiSc Lab Project "Solving the Scattering Problem of Electrons at Atoms on the GPU"
 
-[TOC]
-
 ## Background
 
 The scattering or electrons in a solid at an atom is described by a well-known radial Green function depending on the angular momentum. The Green function is a product of the regular and irregular solutions on a not equally spaced radial grid of a Sturm Liouville type differential equation for each angular momentum, known as the Schrödinger or Dirac equation. To improve the accuracy, the regular and irregular solution are expanded in Chebychev functions. In practical simulation codes this scattering problem hast to be solved millions of times. Therefore we believe that bringing this problem on GPUs would be very beneficial. This would be the main task of the project.
@@ -21,7 +19,6 @@ where $Y_l^m(\hat{r})$ are spherical harmonics and $R_l(r)$ are the radial funct
 $$\left[-\frac{1}{r}\frac{\partial^2}{\partial r^2}r + \frac{l(l+1)}{r^2} + V(r) - E\right] R_l(r;E) = 0$$
 holds.
 
-
 For more details see equation discussion in [Mavropoulos and Papanikolaou](https://juser.fz-juelich.de/record/50027/files/FZJ-2014-02214.pdf) [equation (53) gives the radial Schrödinger equation].
 
 ## Compiling a GPU application on CLAIX
@@ -32,7 +29,7 @@ For more details see equation discussion in [Mavropoulos and Papanikolaou](https
 
 ```bash
 # connect to a CLAIX2018 login node which is equipped with GPUs
-$ ssh pr357554@login18-g-1.hpc.itc.rwth-aachen.de
+$ ssh YOUR-USER-ID@login18-g-1.hpc.itc.rwth-aachen.de
 
 # load NVIDIA fortran compiler environment
 $ module load NVHPC
@@ -60,48 +57,17 @@ Copyright (c) 2021, NVIDIA CORPORATION & AFFILIATES.  All rights reserved.
 ```
 
 
-:::info
-**Excercise:**
+### Excercise
 - Go through [OpenACC introduction and tutorial](https://ulhpc-tutorials.readthedocs.io/en/latest/gpu/openacc/basics/)
     --> try to do the hello world examples in FORTRAN on CLAIX
 
 <details>
 <summary>Solution</summary>
     
+See code in `exercise_1_compile_a_simple_example/` of the [github repository](https://github.com/PhilippRue/SiScLab_23_24).
 
+Compiling and test run:
 ```bash
-$ cat hello_world.f90
-!! Hello_World.f90
-subroutine Print_Hello_World()
-  integer :: i
-  do i = 1, 5
-     print *, "hello world"
-  end do
-end subroutine Print_Hello_World
-
-program hello
-
-  call print_hello_world()
-
-end program hello
-
-$ cat hello_world_openACC.f90
-!! Hello_World_OpenACC.f90
-subroutine Print_Hello_World()
-  integer :: i
-  !$acc kernels
-  do i = 1, 5
-    print *, "hello world"
-  end do
- !$acc end kernels
-end subroutine Print_Hello_World
-
-program hello
-
-  call print_hello_world()
-
-end program hello
-
 # compile code without acceleration (`-Minfo=all` gives us information about parallelization)
 $ nvfortran -fast -Minfo=all -acc=gpu hello_world.f90 -o test.exe
 print_hello_world:
@@ -129,7 +95,6 @@ $ ./test.exe
  hello world
 ```
 </details>
-:::
 
 ### Using the `lect0109` project on CLAIX
 
@@ -174,7 +139,6 @@ The idea is to solve the [Lippmann-Schwinger equation](https://en.wikipedia.org/
 $$\underline{\underline{A}} \ \underline{\underline{U}} = \underline{\underline{J}}$$
 where $\underline{\underline{A}}$, $\underline{\underline{U}}$ and $\underline{\underline{J}}$ are complex-valued matrices of double precision. Thus a system of linear equations has to be solved which is done using [LU decomposition](https://en.wikipedia.org/wiki/LU_decomposition). The CPU version of the algorithm employs the [`ZGETRF`](https://netlib.org/lapack/explore-html/d3/d01/group__complex16_g_ecomputational_ga5b625680e6251feb29e386193914981c.html), [`ZGETRS`](https://netlib.org/lapack/explore-html/d3/d01/group__complex16_g_ecomputational_ga3a5b88a7e8bf70591e521e86464e109d.html) and [`ZGEMM`](https://www.netlib.org/lapack/explore-html/dc/d17/group__complex16__blas__level3_ga4ef748ade85e685b8b2241a7c56dd21c.html) functions of the LAPACK library to perform the necessary LU decomposition (factorization, then solve) and matrix-matrix multiplications, respectively.
 
-:::info
 **Excercise:**
 
 Write a minimal FORTRAN program that does an LU decomposition and a matrix matrix multiplication with double complex matrices using  the LAPACK library:
@@ -192,17 +156,15 @@ Write a minimal FORTRAN program that does an LU decomposition and a matrix matri
 <details>
 <summary>Solution</summary>
 
-Will come early next week ...
+See code in `exercise_2_LAPACK_demonstrators/` of the [github repository](https://github.com/PhilippRue/SiScLab_23_24).
 
 </details>
-:::
 
 
 ## Minimal demonstrator code for GPU acceleration
 
 Before going through the actual implementation of the radial solver, we need to familiarize ourselves with the use of GPU-accelerated libraries and available tools to measure performance. For this we use an example program that only does an LU decomposition for a given matrix where we know the outcome already (e.g. you can check the result with [this online tool](https://www.emathhelp.net/en/calculators/linear-algebra/lu-decomposition-calculator/)).
 
-:::info
 **Excercise:**
 
 Change the minimal example for LU decomposition and matrix-matrix multiplication to use cuda-accelerated libraries.
@@ -246,19 +208,18 @@ Change the minimal example for LU decomposition and matrix-matrix multiplication
     ```
     $ nsys profile --trace=cuda,openacc,nvtx --cuda-um-cpu-page-faults=true -o out_test ./test.exe
     ...
-    Generating '/tmp/pr357554/login18-g-1_171321/nsys-report-6cf5.qdstrm
+    Generating '.../login18-g-1_171321/nsys-report-6cf5.qdstrm
     [1/1] [========================100%] out_test.nsys-rep
     Generated:
-    /rwthfs/rz/cluster/home/pr357554/SiScLab/exercise_3_GPU_demonstrators/out_test.nsys-rep
+    .../exercise_3_GPU_demonstrators/out_test.nsys-rep
     ```
 
 <details>
 <summary>Solution</summary>
 
-Will come early next week ...
+See code in `exercise_3_GPU_demonstrators` of the [github repository](https://github.com/PhilippRue/SiScLab_23_24).
 
 </details>
-:::
 
 ## Benchmarking and tuning of the implementation
 
