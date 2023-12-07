@@ -229,6 +229,13 @@ See code in `exercise_3_GPU_demonstrators` of the [github repository](https://gi
 - batched version of ZGEMM & LU decomposition (see code in `exercise_4_batched_calls` of the [github repository](https://github.com/PhilippRue/SiScLab_23_24))
 - outer CPU level parallelization (OpenMP parallelization) to distribute work over several GPUs
 
+### References for controlling asynchronous kernels
+
+- [OpenACC documentation](https://www.openacc.org/sites/default/files/inline-images/Specification/OpenACC-3.2-final.pdf)
+- `export NVCOMPILER_ACC_SYNCHRONOUS=1` (from [here](https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-user-guide/index.html#env-vars)) makes all OpenACC compute constructs synchronous
+- `export CUDA_LAUNCH_BLOCKING=1` (from [here](https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#cuda-environment-variables)) makes all CUDA Kernels synchronous.
+- `export NVCOMPILER_ACC_POOL_ALLOC=0` (see [here](https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-user-guide/index.html#acc-mem-unified))
+
 
 ## Mini-app for radial Schrödinger equation in JuKKR code
 
