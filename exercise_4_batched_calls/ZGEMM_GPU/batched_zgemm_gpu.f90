@@ -138,7 +138,6 @@ program test_batched
   call system_clock(count=start_time)
 
   ! compare with batched ZGEMM
-  ! https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-fortran/2024-0/gemm-batch-strided.html
   c_array = czero
   stridea = n*n
   strideb = n*n
