@@ -226,7 +226,9 @@ See code in `exercise_3_GPU_demonstrators` of the [github repository](https://gi
 - use OpenMP threaded BLAS/LAPACK library for parallel execution on CPU
 - measure performance for different matrix sizes
 - use OpenACC directives to merge data regions and fuze two matrix-matrix multiplications together
-- batched version of ZGEMM & LU decomposition
+- batched version of ZGEMM & LU decomposition (see code in `exercise_4_batched_calls` of the [github repository](https://github.com/PhilippRue/SiScLab_23_24))
+- outer CPU level parallelization (OpenMP parallelization) to distribute work over several GPUs
+
 
 ## Mini-app for radial Schrödinger equation in JuKKR code
 
