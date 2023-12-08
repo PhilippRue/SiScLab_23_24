@@ -6,15 +6,14 @@ program test
   use mod_read_cmdline, only: get_mat_size_from_input
   implicit none
   integer, parameter :: dp = kind(0.0d0)
-  integer, parameter :: m = 2, lpmax = 2
+  integer, parameter :: m = 2
   integer :: n = 64, num_mult = 1000
   complex (kind=dp), parameter :: cone = (1.0_dp, 0.0_dp), czero = (0.0_dp, 0.0_dp)
   integer :: i, irun
   complex (kind=dp), allocatable :: a_array(:,:,:), a2_array(:,:,:), b_array(:,:,:), b2_array(:,:,:), c_array(:,:,:)
-  character(100) :: fmt
 
   integer :: ierr
-  integer :: clock_rate, start_time, stop_time
+  integer :: clock_rate, start_time, start_time0, stop_time
   real (kind=dp), allocatable :: timings(:)
 
 
@@ -27,7 +26,10 @@ program test
   ! ================== loop over multiple LU calls ==================
 
   ! initialize matrices
-  call init_matrices_batched(n, m, num_mult, a_array, a2_array, b_array, b2_array, c_array, timings)
+  call init_matrices_batched(n, num_mult, a_array, a2_array, b_array, b2_array, c_array, timings)
+
+  ! start measurement of total runtime
+  call system_clock(count=start_time0)
 
   ! start a measurement region in nvtx
   call system_clock(count=start_time)
@@ -63,7 +65,6 @@ program test
 
   ! check c == b2
   write(*, *)
-  write(fmt, '(A, I,A)') '(', 2*lpmax, 'ES12.3)'
   write(*, *) 'max difference', maxval(real(c_array-b2_array, kind=dp))
 
   ! ================== end loop over multiple LU calls ==================
@@ -71,7 +72,7 @@ program test
   ! ================== batched LU calls ==================
 
   ! initialize matrices
-  call init_matrices_batched(n, m, num_mult, a_array, a2_array, b_array, b2_array, c_array, timings)
+  call init_matrices_batched(n, num_mult, a_array, a2_array, b_array, b2_array, c_array, timings)
 
   ! start a measurement region in nvtx
   call system_clock(count=start_time)
@@ -103,22 +104,17 @@ program test
 
   ! check c == b2
   write(*, *)
-  write(fmt, '(A, I,A)') '(', 2*lpmax, 'ES12.3)'
-!   write(*,'(A)') '# result after zgemm'
-!   do i = 1, lpmax
-!     write(*,fmt) c_array(i, :lpmax, num_mult)
-!   end do
-!   write(*,'(A)') '# Difference to input'
-!   do i = 1, lpmax
-!     write(*,fmt) c_array(i, :lpmax, num_mult) - b2_array(i, :lpmax, num_mult)
-!   end do
   write(*, *) 'max difference', maxval(real(c_array-b2_array, kind=dp))
 
   ! ================== end batched LU calls ==================
 
+  ! total runtime
+  call system_clock(count=stop_time) ! Stop timing
+  timings(5) = (stop_time-start_time0)/real(clock_rate)
+
   ! print timings
   write(*, *) 
-  write(*, '(A,4ES12.5)') 'timings:', timings(1:4)
+  write(*, '(A,5ES12.5)') 'timings:', timings(1:5)
 
 
   ! clean up memory allocation

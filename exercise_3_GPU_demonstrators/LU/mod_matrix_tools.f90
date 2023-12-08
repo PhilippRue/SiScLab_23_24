@@ -90,30 +90,33 @@ contains
   end subroutine init_matrices
 
 
-  subroutine init_matrices_batched(n, m, num_mult, a_array, a2_array, b_array, b2_array, c_array, timings)
+  subroutine init_matrices_batched(n, num_mult, a_array, a2_array, b_array, b2_array, c_array, timings)
     implicit none
     ! interface
-    integer, intent(in) :: n, m, num_mult
+    integer, intent(in) :: n, num_mult
     complex (kind=dp), allocatable :: a_array(:,:,:), a2_array(:,:,:), b_array(:,:,:), b2_array(:,:,:), c_array(:,:,:)
     real (kind=dp), allocatable :: timings(:)
     ! local
     complex (kind=dp), allocatable :: a(:,:), a2(:,:), b(:,:), b2(:,:), c(:,:)
     real (kind=dp), allocatable :: tmp(:, :), tmp2(:,:)
     integer :: irun
+    logical, parameter :: init_random = .true. ! for debugging this can be set to false
 
     ! allocate memory and initialize arrays
-    call init_matrices(n, m, a, a2, b, b2, c, timings, print_input=.false., init_random=.true.)
+    call init_matrices(n, 1, a, a2, b, b2, c, timings, print_input=.false., init_random=init_random)
 
     ! set array inputs
     if (.not. allocated(a_array)) allocate(a_array(n,n,num_mult), a2_array(n,n,num_mult), b_array(n,n,num_mult), b2_array(n,n,num_mult), c_array(n,n,num_mult))
     allocate(tmp(n,n), tmp2(n,n))
     do irun = 1, num_mult
-      call random_number(tmp)
-      call random_number(tmp2)
-      a = a + cmplx(tmp, tmp2)
-      call random_number(tmp)
-      call random_number(tmp2)
-      b = b + cmplx(tmp, tmp2)
+      if (init_random) then
+        call random_number(tmp)
+        call random_number(tmp2)
+        a = a + cmplx(tmp, tmp2)
+        call random_number(tmp)
+        call random_number(tmp2)
+        b = b + cmplx(tmp, tmp2)
+      end if
       a_array(:,:, irun) = a(:,:)
       a2_array(:,:, irun) = a(:,:)
       b_array(:,:, irun) = b(:,:)
