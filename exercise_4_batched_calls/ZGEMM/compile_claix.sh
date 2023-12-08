@@ -11,7 +11,7 @@ module load imkl/2023.1.0
 nvfortran \
   -L${MKLROOT}/lib -lmkl_rt -lpthread -lm -ldl \
   -cudalib=cublas,nvtx,cusolver -acc -gpu=managed,lineinfo \
-  batched_zgemm.f90 \
+  ../read_cmdline.f90 batched_zgemm.f90 \
   -o test.exe
 
 

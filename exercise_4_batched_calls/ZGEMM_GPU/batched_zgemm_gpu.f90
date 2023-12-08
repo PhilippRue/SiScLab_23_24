@@ -144,22 +144,8 @@ program test_batched
   stridec = n*n
   batch_size = num_mult
 
-  ! cublasZgemmStridedBatched(cublasHandle_t handle,
-  !                                   cublasOperation_t transa,
-  !                                   cublasOperation_t transb,
-  !                                   int m, int n, int k,
-  !                                   const cuDoubleComplex *alpha,
-  !                                   const cuDoubleComplex *A, int lda,
-  !                                   long long int          strideA,
-  !                                   const cuDoubleComplex *B, int ldb,
-  !                                   long long int          strideB,
-  !                                   const cuDoubleComplex *beta,
-  !                                   cuDoubleComplex       *C, int ldc,
-  !                                   long long int          strideC,
-  !                                   int batchCount)
-
-  ! reinitialize
-  c_array = czero
+  ! cublas documentation for strided batched matrix-matix multiply
+  ! https://docs.nvidia.com/cuda/cublas/index.html#cublas-t-gemmstridedbatched
 
   !$acc data create(c_array)
   !$acc host_data use_device(a_array, b_array, c_array)
