@@ -58,7 +58,7 @@ program test
   call system_clock(count=start_time0)
 
   ! start parallel region where a private handle is created for each CPU thread, these then submit batched calls to the GPUs
-  !$omp parallel default(private) shared(n, batch_size, n_outer, timings, a_array_big, a2_array_big, b_array_big, b2_array_big, c_array_big) reduction(+:timings)
+  !$omp parallel default(private) shared(n, batch_size, n_outer, timings, clock_rate, a_array_big, a2_array_big, b_array_big, b2_array_big, c_array_big) reduction(+:timings)
 
   ! index of OpenMP thread
   ithread = omp_get_thread_num()
@@ -81,6 +81,7 @@ program test
   ! create cublas/cusolver handles for ZGEMM and cusolver handle for LU decomposition
   ! handles are created with the ithread stread id to have separate streams for each thread
 
+  call system_clock(count=start_time)
   call nvtxStartRange('create_handle', 1) ! icolor argument is different for better visibility
 
   ierr = cublasCreate(handle_cublas)
@@ -92,6 +93,8 @@ program test
   if (ierr/=0) stop 'Error in cusovlerCreate'
 
   call nvtxEndRange()
+  call system_clock(count=stop_time) ! Stop timing
+  timings(1) = timings(1) + (stop_time-start_time)/real(clock_rate)
 
   ! ================== batched LU calls ==================
 
@@ -139,22 +142,24 @@ program test
     write(*, *) 'max difference', maxval(real(c_array_big(:,:,:,iloop)-b2_array_big(:,:,:,iloop), kind=dp))
     !$omp end critical
 
-
     ! ================== end batched LU calls ==================
-
-    ! total runtime
-    call system_clock(count=stop_time) ! Stop timing
-    timings(4) = timings(4) + (stop_time-start_time)/real(clock_rate)
 
   end do ! iloop
   !$omp end do
 
+
   ! destroy cublas and cusolver handles
+  call system_clock(count=start_time)
+  call nvtxStartRange('destroy_handle', 5) ! icolor argument is different for better visibility
   ierr = cublasDestroy(handle_cublas)
   if (ierr/=CUBLAS_STATUS_SUCCESS) stop 'Error in cublasDestroy'
 
   ierr = cusolverDnDestroy(handle_cusolver)
   if (ierr/=0) stop 'Error in cusolverDestroy'
+
+  call nvtxEndRange()
+  call system_clock(count=stop_time) ! Stop timing
+  timings(4) = timings(4) + (stop_time-start_time)/real(clock_rate)
 
   !$omp end parallel
   ! done with parallel region
@@ -163,10 +168,10 @@ program test
   deallocate(a_array_big, b_array_big, c_array_big, a2_array_big, b2_array_big)
   
   call system_clock(count=stop_time) ! Stop timing
-  timings(1) = (stop_time-start_time0)/real(clock_rate)
+  timings(5) = (stop_time-start_time0)/real(clock_rate)
   
   ! print timings
   write(*, *)
-  write(*, '(A,5ES12.5)') 'timings per outer loop:', timings(1), timings(2:4)
+  write(*, '(A,5ES12.5)') 'timings (total, h_create, LU, ZGEMM, h_destroy):', timings(5), timings(1:4)
 
 end program test
