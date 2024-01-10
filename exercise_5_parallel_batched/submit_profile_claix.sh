@@ -16,7 +16,7 @@
 #SBATCH --nodes=1
 
 ### Number of CPUS per task (for distributed-memory parallelisation, use 1)
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=4
 
 ### Disable hyperthreading by setting the tasks per core to 1
 #SBATCH --ntasks-per-core=1
@@ -25,7 +25,7 @@
 #SBATCH --ntasks-per-node=1
 
 ### Use nodes with GPUs
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:2
 
 
 # load compiler envoronment
