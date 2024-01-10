@@ -226,8 +226,10 @@ See code in `exercise_3_GPU_demonstrators` of the [github repository](https://gi
 - use OpenMP threaded BLAS/LAPACK library for parallel execution on CPU
 - measure performance for different matrix sizes
 - use OpenACC directives to merge data regions and fuze two matrix-matrix multiplications together
-- batched version of ZGEMM & LU decomposition (see code in `exercise_4_batched_calls` of the [github repository](https://github.com/PhilippRue/SiScLab_23_24))
+- batched version of ZGEMM & LU decomposition
+  * see code in `exercise_4_batched_calls` of the [github repository](https://github.com/PhilippRue/SiScLab_23_24)
 - outer CPU level parallelization (OpenMP parallelization) to distribute work over several GPUs
+  * see `exercise_5_parallel_batched` of the [github repository](https://github.com/PhilippRue/SiScLab_23_24) for OpenMP parallel version of LU+ZGEMM test application on multiple GPUs
 
 ### References for controlling asynchronous kernels
 
@@ -236,7 +238,3 @@ See code in `exercise_3_GPU_demonstrators` of the [github repository](https://gi
 - `export CUDA_LAUNCH_BLOCKING=1` (from [here](https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#cuda-environment-variables)) makes all CUDA Kernels synchronous.
 - `export NVCOMPILER_ACC_POOL_ALLOC=0` (see [here](https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-user-guide/index.html#acc-mem-unified))
 
-
-## Mini-app for radial Schrödinger equation in JuKKR code
-
-Will come next ...
