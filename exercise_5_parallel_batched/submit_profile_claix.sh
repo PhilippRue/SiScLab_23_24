@@ -36,11 +36,18 @@ export OMP_NUM_THREADS=1
 nsys profile --trace=cuda,openacc,nvtx \
              --cuda-um-cpu-page-faults=true \
              --force-overwrite=true \
-             -o out_test_LU_batched_GPU_1 ./test.exe -o 20
+             -o out_test_parallel_LU_batched_GPU_CLAIX_1 ./test.exe -o 20
 
 # nvtx profiling, two OpenMP CPU thread
 export OMP_NUM_THREADS=2
 nsys profile --trace=cuda,openacc,nvtx \
              --cuda-um-cpu-page-faults=true \
              --force-overwrite=true \
-             -o out_test_LU_batched_GPU_1 ./test.exe -o 20
+             -o out_test_parallel_LU_batched_GPU_CLAIX_2 ./test.exe -o 20
+
+# nvtx profiling, two OpenMP CPU thread
+export OMP_NUM_THREADS=4
+nsys profile --trace=cuda,openacc,nvtx \
+             --cuda-um-cpu-page-faults=true \
+             --force-overwrite=true \
+             -o out_test_parallel_LU_batched_GPU_CLAIX_4 ./test.exe -o 20
