@@ -81,7 +81,7 @@ contains
   end subroutine linearsolve_dc_batched
 
 
-  subroutine linearsolve_dc_GPU(Amat, Bmat, handle_cusolver)
+  subroutine linearsolve_dc_GPU(Amat, Bmat, handle_cusolver, ithread)
     use cublas_v2
     use cusolverDn
     use openacc
@@ -91,6 +91,7 @@ contains
     complex(kind=dp),intent(in)    :: Amat(:,:)
     complex(kind=dp),intent(inout) :: Bmat(:,:)
     type (cusolverDnHandle) :: handle_cusolver
+    integer, optional :: ithread !! thread index for syncronizing correct queue with outer OpenMP parallism
     !local variables
     integer :: nrow,ncol
     integer :: info
@@ -128,12 +129,16 @@ contains
     
     !$acc end host_data
     !$acc end data
-    !$acc wait
+    if (present(ithread)) then
+      !$acc wait(ithread)
+    else
+      !$acc wait
+    end if
 
   end subroutine linearsolve_dc_GPU
 
 
-  subroutine linearsolve_dc_GPU_batched(Amat, Bmat, handle_cublas)
+  subroutine linearsolve_dc_GPU_batched(Amat, Bmat, handle_cublas, ithread)
     use cublas_v2
     use cusolverDn
     use openacc
@@ -143,6 +148,7 @@ contains
     complex (kind=dp), intent(in)    :: Amat(:,:,:)
     complex (kind=dp), intent(inout) :: Bmat(:,:,:)
     type (cublasHandle) :: handle_cublas
+    integer, optional :: ithread !! thread index for syncronizing correct queue with outer OpenMP parallism
     !local variables
     type(c_devptr), allocatable :: devPtr_Amat(:)
     type(c_devptr), allocatable :: devPtr_Bmat(:)
@@ -185,7 +191,12 @@ contains
     ierr = cublasZgetrsBatched(handle_cublas, CUBLAS_OP_N, nrow, ncol, devPtr_Amat, nrow, ipiv, devPtr_Bmat, nrow, info, batch_size)
     if (ierr/=0) stop 'Error cusolverZgetrs Bmat'
     
-    !$acc wait
+    if (present(ithread)) then
+      !$acc wait(ithread)
+    else
+      !$acc wait
+    end if
+
     !$acc end host_data
     !$acc end data
 
